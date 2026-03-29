@@ -1,29 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import getDb from '@/lib/db';
+import { sql, initializeDb } from '@/lib/db';
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const db = getDb();
+  await initializeDb();
   const body = await req.json();
 
-  db.prepare(`
-    UPDATE items SET name = ?, description = ?, price = ?, price_currency = ?, delivery_price = ?, source_url = ?,
-    image_url = ?, category = ?, quantity_needed = ?, priority = ?, updated_at = datetime('now')
-    WHERE id = ?
-  `).run(
-    body.name, body.description || null, body.price, body.price_currency || 'CZK', body.delivery_price || 0,
-    body.source_url || null, body.image_url || null,
-    body.category || 'general', body.quantity_needed || 1, body.priority || 'medium', id
-  );
+  await sql`
+    UPDATE items SET name = ${body.name}, description = ${body.description || null}, price = ${body.price},
+    price_currency = ${body.price_currency || 'CZK'}, delivery_price = ${body.delivery_price || 0},
+    source_url = ${body.source_url || null}, image_url = ${body.image_url || null},
+    category = ${body.category || 'general'}, quantity_needed = ${body.quantity_needed || 1},
+    priority = ${body.priority || 'medium'}, updated_at = NOW()
+    WHERE id = ${id}
+  `;
 
-  const item = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
-  return NextResponse.json(item);
+  const { rows } = await sql`SELECT * FROM items WHERE id = ${id}`;
+  return NextResponse.json(rows[0]);
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const db = getDb();
-  db.prepare('DELETE FROM payment_items WHERE item_id = ?').run(id);
-  db.prepare('DELETE FROM items WHERE id = ?').run(id);
+  await initializeDb();
+  await sql`DELETE FROM payment_items WHERE item_id = ${id}`;
+  await sql`DELETE FROM items WHERE id = ${id}`;
   return NextResponse.json({ success: true });
 }

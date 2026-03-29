@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -21,13 +18,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 });
   }
 
-  const ext = file.name.split('.').pop() || 'jpg';
-  const filename = `${uuidv4()}.${ext}`;
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-
-  await mkdir(uploadDir, { recursive: true });
+  // Convert to base64 data URL (works on serverless without filesystem)
   const bytes = new Uint8Array(await file.arrayBuffer());
-  await writeFile(path.join(uploadDir, filename), bytes);
+  const base64 = Buffer.from(bytes).toString('base64');
+  const dataUrl = `data:${file.type};base64,${base64}`;
 
-  return NextResponse.json({ url: `/uploads/${filename}` });
+  return NextResponse.json({ url: dataUrl });
 }
