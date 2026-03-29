@@ -335,7 +335,7 @@ export default function CheckoutModal({ cart, theme, settings, locale, onClose, 
                       </svg>
                     </div>
                     <p className="text-xs font-semibold text-gray-600">Revolut</p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">{t.payWithRevolut || 'Pay with Revolut'}</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Card / Apple Pay</p>
                   </a>
                 )}
 
