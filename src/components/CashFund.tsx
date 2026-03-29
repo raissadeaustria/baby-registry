@@ -255,8 +255,8 @@ export default function CashFund({ theme, settings, locale, onComplete }: CashFu
                       <path d="M20.39 6.05L13.06 18.3a1.2 1.2 0 01-2.12 0L3.61 6.05A1.2 1.2 0 014.67 4.2h14.66a1.2 1.2 0 011.06 1.85z"/>
                     </svg>
                   </div>
-                  <p className="text-xs font-semibold text-gray-600">Revolut</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">Card / Apple Pay</p>
+                  <p className="text-xs font-semibold text-gray-600">Credit/Debit Card</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Apple Pay / Revolut</p>
                 </a>
               )}
 
