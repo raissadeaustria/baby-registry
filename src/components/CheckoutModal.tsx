@@ -24,6 +24,7 @@ export default function CheckoutModal({ cart, theme, settings, locale, onClose, 
   const [uploading, setUploading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedBank, setSelectedBank] = useState<number | null>(null);
 
   const isBoy = theme === 'boy';
   const currency = getCurrency(locale);
@@ -293,67 +294,92 @@ export default function CheckoutModal({ cart, theme, settings, locale, onClose, 
                 <p className={`text-3xl font-bold ${isBoy ? 'text-boy-600' : 'text-girl-600'}`}>{formatPrice(total, currency)}</p>
               </div>
 
-              {/* Bank Transfer */}
-              {/* Bank Accounts */}
-              {bankAccounts.map((account, i) => (
-                <div key={i} className="border border-gray-200 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                    <h3 className="font-semibold text-gray-800 text-sm">
-                      {t.bankTransfer} ({isEur ? 'EUR' : 'CZK'}){bankAccounts.length > 1 ? ` #${i + 1}` : ''}
-                    </h3>
-                  </div>
-                  {account.qr && (
+              {/* Payment method label */}
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t.choosePaymentMethod || 'Choose payment method'}</p>
+
+              {/* Payment options grid - side by side */}
+              <div className="grid grid-cols-2 gap-2">
+                {bankAccounts.map((account, i) => {
+                  const bankName = account.details.replace(/\\n/g, '\n').split('\n')[0].trim();
+                  const isSelected = selectedBank === i;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedBank(isSelected ? null : i)}
+                      className={`p-3 rounded-xl border-2 text-center transition-all ${
+                        isSelected
+                          ? isBoy ? 'border-boy-500 bg-boy-50' : 'border-girl-500 bg-girl-50'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <svg className={`w-6 h-6 mx-auto mb-1.5 ${isSelected ? (isBoy ? 'text-boy-500' : 'text-girl-500') : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      <p className={`text-xs font-semibold truncate ${isSelected ? 'text-gray-800' : 'text-gray-600'}`}>{bankName}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{t.bankTransfer}</p>
+                    </button>
+                  );
+                })}
+
+                {/* Revolut option */}
+                {revolutLink && (
+                  <a
+                    href={revolutLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 rounded-xl border-2 border-gray-200 hover:border-[#0075EB] text-center transition-all bg-white"
+                  >
+                    <div className="w-6 h-6 mx-auto mb-1.5 rounded-full bg-[#0075EB] flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.39 6.05L13.06 18.3a1.2 1.2 0 01-2.12 0L3.61 6.05A1.2 1.2 0 014.67 4.2h14.66a1.2 1.2 0 011.06 1.85z"/>
+                      </svg>
+                    </div>
+                    <p className="text-xs font-semibold text-gray-600">Revolut</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{t.payWithRevolut || 'Pay with Revolut'}</p>
+                  </a>
+                )}
+
+                {/* Bizum - EUR only */}
+                {isEur && settings?.bizum_phone && (
+                  <a
+                    href="https://bizum.es"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 rounded-xl border-2 border-gray-200 hover:border-[#05C1B2] text-center transition-all bg-white"
+                  >
+                    <div className="w-6 h-6 mx-auto mb-1.5 rounded-full bg-[#05C1B2] flex items-center justify-center">
+                      <span className="text-white font-bold text-xs">B</span>
+                    </div>
+                    <p className="text-xs font-semibold text-gray-600">Bizum</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{settings.bizum_phone}</p>
+                  </a>
+                )}
+              </div>
+
+              {/* Expanded bank details */}
+              {selectedBank !== null && bankAccounts[selectedBank] && (
+                <div className={`border-2 rounded-xl p-4 transition-all ${isBoy ? 'border-boy-200 bg-boy-50/50' : 'border-girl-200 bg-girl-50/50'}`}>
+                  {bankAccounts[selectedBank].qr && (
                     <div className="flex justify-center mb-3">
-                      <img src={account.qr} alt="QR Code" className="w-32 h-32 object-contain rounded-lg" />
+                      <img src={bankAccounts[selectedBank].qr} alt="QR Code" className="w-28 h-28 object-contain rounded-lg bg-white p-1" />
                     </div>
                   )}
-                  <pre className="text-xs text-gray-600 whitespace-pre-wrap bg-gray-50 p-3 rounded-lg mb-3 font-mono">
-                    {account.details.replace(/\\n/g, '\n')}
+                  <pre className="text-xs text-gray-600 whitespace-pre-wrap bg-white p-3 rounded-lg mb-3 font-mono">
+                    {bankAccounts[selectedBank].details.replace(/\\n/g, '\n')}
                   </pre>
                   <button
-                    onClick={() => copyText(account.details)}
+                    onClick={() => copyText(bankAccounts[selectedBank!].details)}
                     className={`w-full py-2.5 rounded-lg border font-medium text-sm transition-all ${
                       copied
                         ? 'bg-green-50 border-green-300 text-green-600'
                         : isBoy
-                          ? 'border-boy-200 text-boy-600 hover:bg-boy-50'
-                          : 'border-girl-200 text-girl-600 hover:bg-girl-50'
+                          ? 'border-boy-200 text-boy-600 hover:bg-white'
+                          : 'border-girl-200 text-girl-600 hover:bg-white'
                     }`}
                   >
                     {copied ? t.copied : t.copyAccountDetails}
                   </button>
                 </div>
-              ))}
-
-              {/* Revolut */}
-              {revolutLink && (
-                <a
-                  href={revolutLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#0075EB] text-white font-semibold text-sm hover:bg-[#0066CC] transition-colors"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.39 6.05L13.06 18.3a1.2 1.2 0 01-2.12 0L3.61 6.05A1.2 1.2 0 014.67 4.2h14.66a1.2 1.2 0 011.06 1.85z"/>
-                  </svg>
-                  {t.payWithRevolut}
-                </a>
-              )}
-
-              {/* Bizum - EUR only */}
-              {isEur && settings?.bizum_phone && (
-                <a
-                  href="https://bizum.es"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#05C1B2] text-white font-semibold text-sm hover:bg-[#04AEA0] transition-colors"
-                >
-                  <span className="text-lg font-bold">B</span>
-                  Bizum: {settings.bizum_phone}
-                </a>
               )}
 
               <button

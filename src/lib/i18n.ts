@@ -36,6 +36,7 @@ export interface Translations {
   bankTransfer: string;
   copyAccountDetails: string;
   copied: string;
+  choosePaymentMethod: string;
   payWithRevolut: string;
   iHaveSentPayment: string;
   processing: string;
@@ -101,6 +102,7 @@ const en: Translations = {
   bankTransfer: 'Bank Transfer',
   copyAccountDetails: 'Copy Account Details',
   copied: 'Copied!',
+  choosePaymentMethod: 'Choose payment method',
   payWithRevolut: 'Pay with Revolut',
   iHaveSentPayment: 'I Have Sent the Payment',
   processing: 'Processing...',
@@ -163,6 +165,7 @@ const es: Translations = {
   bankTransfer: 'Transferencia Bancaria',
   copyAccountDetails: 'Copiar Datos Bancarios',
   copied: '¡Copiado!',
+  choosePaymentMethod: 'Elige método de pago',
   payWithRevolut: 'Pagar con Revolut',
   iHaveSentPayment: 'Ya Envié el Pago',
   processing: 'Procesando...',
@@ -225,6 +228,7 @@ const cz: Translations = {
   bankTransfer: 'Bankovní Převod',
   copyAccountDetails: 'Kopírovat Údaje Účtu',
   copied: 'Zkopírováno!',
+  choosePaymentMethod: 'Vyberte způsob platby',
   payWithRevolut: 'Zaplatit přes Revolut',
   iHaveSentPayment: 'Platbu Jsem Odeslal/a',
   processing: 'Zpracovávám...',
