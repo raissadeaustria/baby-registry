@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { type CartItem, type Settings, formatPrice, convertPrice } from '@/lib/types';
 import { type Locale, getTranslations, getCurrency } from '@/lib/i18n';
 
@@ -129,16 +129,33 @@ export default function CheckoutModal({ cart, theme, settings, locale, onClose, 
           </div>
 
           {/* Step indicator */}
-          <div className="flex gap-2">
+          <div className="flex items-center gap-1">
             {steps.map((s, i) => (
-              <div
-                key={s}
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  i <= stepIndex
-                    ? isBoy ? 'bg-boy-500' : 'bg-girl-500'
-                    : 'bg-gray-100'
-                }`}
-              />
+              <React.Fragment key={s}>
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
+                    i < stepIndex
+                      ? 'bg-green-500 text-white'
+                      : i === stepIndex
+                        ? isBoy ? 'bg-boy-500 text-white' : 'bg-girl-500 text-white'
+                        : 'bg-gray-100 text-gray-400'
+                  }`}>
+                    {i < stepIndex ? (
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                    ) : i + 1}
+                  </div>
+                  <span className={`text-[10px] font-medium hidden sm:inline ${
+                    i <= stepIndex ? 'text-gray-700' : 'text-gray-400'
+                  }`}>
+                    {s === 'info' ? t.yourDetails : s === 'summary' ? t.orderSummary : t.payment}
+                  </span>
+                </div>
+                {i < steps.length - 1 && (
+                  <div className={`h-px flex-1 mx-1 transition-colors ${
+                    i < stepIndex ? 'bg-green-300' : 'bg-gray-100'
+                  }`} />
+                )}
+              </React.Fragment>
             ))}
           </div>
         </div>

@@ -42,6 +42,7 @@ export default function GuestPage() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  const loading = !settings;
   const availableItems = items.filter(i => i.quantity_fulfilled < i.quantity_needed);
   const fulfilledCount = items.filter(i => i.quantity_fulfilled >= i.quantity_needed).length;
 
@@ -179,7 +180,20 @@ export default function GuestPage() {
           </p>
         </div>
 
-        {filteredItems.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 animate-pulse">
+                <div className="w-full aspect-square bg-gray-200" />
+                <div className="p-3 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                  <div className="h-8 bg-gray-100 rounded-lg w-full mt-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
               <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

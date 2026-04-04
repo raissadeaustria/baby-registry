@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import QRCode from 'qrcode';
 import { type Item, type Payment, type Settings, formatPrice } from '@/lib/types';
 
 type Tab = 'items' | 'checklist' | 'contributions' | 'messages' | 'settings';
@@ -17,6 +18,10 @@ export default function AdminDashboard() {
   const [authError, setAuthError] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [showQr, setShowQr] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchAll = useCallback(async () => {
     const [itemsRes, paymentsRes, settingsRes] = await Promise.all([
@@ -39,14 +44,22 @@ export default function AdminDashboard() {
     if (saved === 'true') setIsAuthenticated(true);
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'baby2026';
-    if (password === adminPass) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('admin_auth', 'true');
-      setAuthError(false);
-    } else {
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      if (res.ok) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem('admin_auth', 'true');
+        setAuthError(false);
+      } else {
+        setAuthError(true);
+      }
+    } catch {
       setAuthError(true);
     }
   };
@@ -56,6 +69,16 @@ export default function AdminDashboard() {
     navigator.clipboard.writeText(link);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const toggleQr = async () => {
+    if (showQr) { setShowQr(false); return; }
+    if (!qrDataUrl) {
+      const url = `${window.location.origin}/registry`;
+      const dataUrl = await QRCode.toDataURL(url, { width: 300, margin: 2, color: { dark: '#4A3728', light: '#FFFFFF' } });
+      setQrDataUrl(dataUrl);
+    }
+    setShowQr(true);
   };
 
   if (!isAuthenticated) {
@@ -98,8 +121,8 @@ export default function AdminDashboard() {
   }
 
   const deleteItem = async (id: string) => {
-    if (!confirm('Delete this item?')) return;
     await fetch(`/api/items/${id}`, { method: 'DELETE' });
+    setDeleteConfirm(null);
     fetchAll();
   };
 
@@ -118,8 +141,10 @@ export default function AdminDashboard() {
   const czkPayments = confirmedPayments.filter(p => p.currency !== 'EUR');
   const totalEur = eurPayments.reduce((sum, p) => sum + p.amount, 0);
   const totalCzk = czkPayments.reduce((sum, p) => sum + p.amount, 0);
-  const fulfilledItems = items.filter(i => i.quantity_fulfilled >= i.quantity_needed);
-  const activeItems = items.filter(i => i.quantity_fulfilled < i.quantity_needed);
+  const searchLower = searchQuery.toLowerCase();
+  const matchesSearch = (i: Item) => !searchQuery || i.name.toLowerCase().includes(searchLower) || i.category.toLowerCase().includes(searchLower);
+  const fulfilledItems = items.filter(i => i.quantity_fulfilled >= i.quantity_needed && matchesSearch(i));
+  const activeItems = items.filter(i => i.quantity_fulfilled < i.quantity_needed && matchesSearch(i));
   const messagesWithDedication = payments.filter(p => p.dedication || p.guest_image);
   const currency = settings?.currency || 'CZK';
 
@@ -180,6 +205,13 @@ export default function AdminDashboard() {
                   </>
                 )}
               </button>
+              <button
+                onClick={toggleQr}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/80 backdrop-blur-sm text-xs text-[#8B6F5A] font-medium shadow-sm border border-[#E8D5C0]/50 hover:bg-white transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="3" height="3" /><rect x="18" y="18" width="3" height="3" /></svg>
+                QR
+              </button>
               <a
                 href="/registry"
                 target="_blank"
@@ -189,6 +221,23 @@ export default function AdminDashboard() {
                 Preview
               </a>
             </div>
+            {showQr && qrDataUrl && (
+              <div className="mt-3 bg-white rounded-2xl p-4 shadow-sm border border-[#E8D5C0]/50 text-center">
+                <img src={qrDataUrl} alt="Registry QR Code" className="w-40 h-40 mx-auto mb-2" />
+                <p className="text-[10px] text-[#B8977A]">Scan to open registry</p>
+                <button
+                  onClick={() => {
+                    const a = document.createElement('a');
+                    a.href = qrDataUrl;
+                    a.download = 'registry-qr-code.png';
+                    a.click();
+                  }}
+                  className="mt-2 text-[10px] text-[#D4935A] font-semibold hover:underline"
+                >
+                  Download QR Code
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Stats cards */}
@@ -268,13 +317,25 @@ export default function AdminDashboard() {
         {/* ─── ITEMS TAB ─── */}
         {tab === 'items' && (
           <div className="animate-fade-in">
-            <button
-              onClick={() => { setEditingItem(null); setShowAddItem(true); }}
-              className="mb-5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#D4935A] to-[#C4834A] text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-              Add New Item
-            </button>
+            <div className="flex gap-2 mb-5">
+              <div className="flex-1 relative">
+                <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C4B09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search items..."
+                  className="w-full pl-10 pr-4 py-3.5 rounded-2xl border border-[#E8D5C0]/60 text-[#4A3728] text-sm bg-white focus:outline-none focus:border-[#D4935A] focus:ring-1 focus:ring-[#D4935A]/30 placeholder-[#C4B09A] transition-colors"
+                />
+              </div>
+              <button
+                onClick={() => { setEditingItem(null); setShowAddItem(true); }}
+                className="py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#D4935A] to-[#C4834A] text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                Add
+              </button>
+            </div>
 
             {showAddItem && (
               <ItemForm
@@ -352,7 +413,7 @@ export default function AdminDashboard() {
                           Edit
                         </button>
                         <button
-                          onClick={() => deleteItem(item.id)}
+                          onClick={() => setDeleteConfirm(item.id)}
                           className="py-2 px-3 rounded-xl bg-red-50 text-red-400 text-xs font-semibold hover:bg-red-100 hover:text-red-500 transition-colors flex items-center gap-1.5"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -445,6 +506,56 @@ export default function AdminDashboard() {
               )}
             </div>
 
+            {/* Analytics */}
+            {confirmedPayments.length > 0 && (() => {
+              const byDay: Record<string, number> = {};
+              confirmedPayments.forEach(p => {
+                const day = new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                byDay[day] = (byDay[day] || 0) + 1;
+              });
+              const days = Object.entries(byDay).slice(-10);
+              const maxCount = Math.max(...days.map(([, c]) => c));
+              const byType = { cash: confirmedPayments.filter(p => p.payment_type === 'cash_fund').length, items: confirmedPayments.length - confirmedPayments.filter(p => p.payment_type === 'cash_fund').length };
+              return (
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  <div className="bg-white rounded-2xl p-4 border border-[#F0E8DD]/80 shadow-sm">
+                    <p className="text-[10px] text-[#B8977A] uppercase tracking-wider font-medium mb-3">Gifts by Day</p>
+                    <div className="flex items-end gap-1 h-20">
+                      {days.map(([day, count]) => (
+                        <div key={day} className="flex-1 flex flex-col items-center gap-1">
+                          <div className="w-full bg-gradient-to-t from-[#D4935A] to-[#E8B87A] rounded-t-sm transition-all" style={{ height: `${(count / maxCount) * 100}%`, minHeight: 4 }} />
+                          <span className="text-[8px] text-[#C4B09A] leading-none">{day.split(' ')[1]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl p-4 border border-[#F0E8DD]/80 shadow-sm">
+                    <p className="text-[10px] text-[#B8977A] uppercase tracking-wider font-medium mb-3">Gift Types</p>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="flex justify-between text-[10px] mb-1">
+                          <span className="text-[#8B6F5A] font-medium">Cash Gifts</span>
+                          <span className="text-[#B8977A]">{byType.cash}</span>
+                        </div>
+                        <div className="w-full bg-[#F5EDE3] rounded-full h-2">
+                          <div className="h-2 rounded-full bg-[#9B7AB8]" style={{ width: `${confirmedPayments.length > 0 ? (byType.cash / confirmedPayments.length) * 100 : 0}%` }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-[10px] mb-1">
+                          <span className="text-[#8B6F5A] font-medium">Item Gifts</span>
+                          <span className="text-[#B8977A]">{byType.items}</span>
+                        </div>
+                        <div className="w-full bg-[#F5EDE3] rounded-full h-2">
+                          <div className="h-2 rounded-full bg-[#D4935A]" style={{ width: `${confirmedPayments.length > 0 ? (byType.items / confirmedPayments.length) * 100 : 0}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {payments.length === 0 ? (
               <div className="text-center py-16">
                 <div className="w-20 h-20 rounded-full bg-[#FDF5ED] flex items-center justify-center mx-auto mb-4">
@@ -501,6 +612,19 @@ export default function AdminDashboard() {
                         {payment.dedication && (
                           <p className="p-3 text-xs text-[#8B6F5A] italic leading-relaxed">&ldquo;{payment.dedication}&rdquo;</p>
                         )}
+                      </div>
+                    )}
+                    {payment.guest_contact && (
+                      <div className="mt-2 flex gap-2">
+                        <a
+                          href={`https://wa.me/${payment.guest_contact.replace(/[^0-9+]/g, '')}?text=${encodeURIComponent(`Thank you so much for your generous gift, ${payment.guest_name}! We really appreciate it! 💛`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#25D366]/10 text-[#25D366] text-[10px] font-semibold hover:bg-[#25D366]/20 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 01-4.243-1.212l-.252-.149-2.868.852.852-2.868-.149-.252A8 8 0 1112 20z"/></svg>
+                          Reply on WhatsApp
+                        </a>
                       </div>
                     )}
                   </div>
@@ -624,6 +748,24 @@ ${messagesWithDedication.map(p => `<div class="card">
           </div>
         )}
       </main>
+
+      {/* Delete confirmation modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
+          <div className="relative bg-white rounded-2xl p-6 max-w-xs w-full mx-4 shadow-2xl text-center animate-fade-in-scale">
+            <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </div>
+            <h3 className="text-base font-bold text-[#4A3728] mb-1">Delete this item?</h3>
+            <p className="text-xs text-[#B8977A] mb-5">This action cannot be undone.</p>
+            <div className="flex gap-2">
+              <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 rounded-xl border border-[#E8D5C0]/60 text-sm font-medium text-[#8B6F5A] hover:bg-[#FDF5ED] transition-colors">Cancel</button>
+              <button onClick={() => deleteItem(deleteConfirm)} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -795,9 +937,14 @@ function ItemForm({ item, onSave, onCancel }: {
           <input type="number" min="1" value={quantityNeeded} onChange={e => setQuantityNeeded(e.target.value)} className={inputClass} placeholder="1" />
         </div>
       </div>
-      {!imageUrl && (
-        <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} className={inputClass} placeholder="Image URL (optional)" />
-      )}
+      <div className="flex gap-3 items-start">
+        <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} className={`${inputClass} flex-1`} placeholder="Image URL (optional)" />
+        {imageUrl && (
+          <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-[#E8D5C0]/60 bg-[#FDF5ED]">
+            <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          </div>
+        )}
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <select value={category} onChange={e => setCategory(e.target.value)} className={inputClass}>
           <option value="general">General</option>
