@@ -97,17 +97,16 @@ export default function GuestPage() {
       </header>
 
       {/* Hero Banner */}
-      <section className="relative w-full h-56 sm:h-72 md:h-80 lg:h-96 overflow-hidden">
-        <div className={`absolute inset-0 ${
-          isBoy
-            ? 'bg-gradient-to-br from-boy-300 via-boy-400 to-boy-600'
-            : 'bg-gradient-to-br from-girl-300 via-girl-400 to-girl-600'
-        }`} />
+      <section className={`relative w-full overflow-hidden ${
+        isBoy
+          ? 'bg-gradient-to-br from-boy-300 via-boy-400 to-boy-600'
+          : 'bg-gradient-to-br from-girl-300 via-girl-400 to-girl-600'
+      }`}>
         <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-10 bg-white" />
         <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full opacity-10 bg-white" />
         <div className="absolute top-1/4 right-1/4 w-32 h-32 rounded-full opacity-5 bg-white" />
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-6">
+        <div className="relative flex flex-col items-center justify-center text-white px-6 py-10 sm:py-16 md:py-20">
           <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 sm:px-8 py-4 sm:py-6 text-center max-w-lg">
             <p className="text-sm uppercase tracking-[0.25em] opacity-80 mb-2">{t.welcomeTo}</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 leading-tight">
