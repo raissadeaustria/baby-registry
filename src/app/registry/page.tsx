@@ -108,7 +108,7 @@ export default function GuestPage() {
         <div className="absolute top-1/4 right-1/4 w-32 h-32 rounded-full opacity-5 bg-white" />
 
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-6">
-          <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-8 py-6 text-center max-w-lg">
+          <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 sm:px-8 py-4 sm:py-6 text-center max-w-lg">
             <p className="text-sm uppercase tracking-[0.25em] opacity-80 mb-2">{t.welcomeTo}</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 leading-tight">
               {settings?.baby_name || 'Baby'}&apos;s {t.giftRegistry}
@@ -116,7 +116,7 @@ export default function GuestPage() {
             <p className="text-base sm:text-lg opacity-90 mb-4">
               {settings?.welcome_message || 'Welcome to our Baby Registry!'}
             </p>
-            <div className="flex items-center justify-center gap-6 text-sm">
+            <div className="flex items-center justify-center gap-3 sm:gap-6 text-sm">
               <div className="text-center">
                 <p className="text-2xl font-bold">{items.length}</p>
                 <p className="opacity-75">{t.wishes}</p>

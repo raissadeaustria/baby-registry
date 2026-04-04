@@ -115,7 +115,7 @@ export default function ItemCard({ item, theme, currency, locale, onAdd, cartQua
               <button
                 onClick={decrementQty}
                 disabled={selectedQty <= 1}
-                className="w-7 h-7 rounded-md bg-white text-gray-600 flex items-center justify-center text-sm font-bold shadow-sm disabled:opacity-30 disabled:shadow-none transition-opacity"
+                className="w-9 h-9 sm:w-7 sm:h-7 rounded-md bg-white text-gray-600 flex items-center justify-center text-sm font-bold shadow-sm disabled:opacity-30 disabled:shadow-none transition-opacity"
               >
                 -
               </button>
@@ -126,7 +126,7 @@ export default function ItemCard({ item, theme, currency, locale, onAdd, cartQua
               <button
                 onClick={incrementQty}
                 disabled={selectedQty >= maxSelectable}
-                className="w-7 h-7 rounded-md bg-white text-gray-600 flex items-center justify-center text-sm font-bold shadow-sm disabled:opacity-30 disabled:shadow-none transition-opacity"
+                className="w-9 h-9 sm:w-7 sm:h-7 rounded-md bg-white text-gray-600 flex items-center justify-center text-sm font-bold shadow-sm disabled:opacity-30 disabled:shadow-none transition-opacity"
               >
                 +
               </button>

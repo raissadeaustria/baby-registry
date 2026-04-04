@@ -130,14 +130,14 @@ export default function ThankYouModal({ guestName, theme, locale, message, onClo
 
       {/* Modal card */}
       <div
-        className={`relative w-full max-w-2xl mx-4 rounded-3xl shadow-2xl overflow-hidden transition-all duration-700 ${
+        className={`relative w-full max-w-sm sm:max-w-2xl mx-4 rounded-3xl shadow-2xl overflow-hidden transition-all duration-700 ${
           visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-8'
         }`}
         style={{ boxShadow: `0 25px 60px -12px ${isBoy ? 'rgba(124,185,232,0.4)' : 'rgba(244,194,194,0.4)'}` }}
       >
         {/* Header with decorative pattern */}
         <div
-          className={`relative text-white py-20 text-center overflow-hidden ${
+          className={`relative text-white py-10 sm:py-20 text-center overflow-hidden ${
             isBoy
               ? 'bg-gradient-to-br from-boy-300 via-boy-400 to-boy-500'
               : 'bg-gradient-to-br from-girl-300 via-girl-400 to-girl-500'
@@ -177,15 +177,15 @@ export default function ThankYouModal({ guestName, theme, locale, message, onClo
 
           {/* Floating heart icon */}
           <div className="relative z-10">
-            <div className="w-28 h-28 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-6 animate-float ring-4 ring-white/10">
-              <div className="w-20 h-20 rounded-full bg-white/25 flex items-center justify-center">
-                <svg className="w-12 h-12 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="currentColor">
+            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-float ring-4 ring-white/10">
+              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-white/25 flex items-center justify-center">
+                <svg className="w-8 h-8 sm:w-12 sm:h-12 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
               </div>
             </div>
-            <h2 className="text-6xl font-bold tracking-wide drop-shadow-sm">{t.thankYou}</h2>
-            <p className="text-white/80 text-2xl mt-2 font-medium">{guestName}!</p>
+            <h2 className="text-4xl sm:text-6xl font-bold tracking-wide drop-shadow-sm">{t.thankYou}</h2>
+            <p className="text-white/80 text-lg sm:text-2xl mt-1 sm:mt-2 font-medium">{guestName}!</p>
           </div>
 
           {/* Bottom curve */}
@@ -197,7 +197,7 @@ export default function ThankYouModal({ guestName, theme, locale, message, onClo
         </div>
 
         {/* Body */}
-        <div className="bg-white px-12 pb-10 pt-6 text-center">
+        <div className="bg-white px-6 sm:px-12 pb-8 sm:pb-10 pt-4 sm:pt-6 text-center">
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className={`h-px w-12 ${isBoy ? 'bg-boy-200' : 'bg-girl-200'}`} />
             <svg

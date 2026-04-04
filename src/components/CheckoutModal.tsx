@@ -395,7 +395,7 @@ export default function CheckoutModal({ cart, theme, settings, locale, onClose, 
                       {bankAccounts[selectedBank].qr && (
                         <p className={`text-xs font-semibold uppercase tracking-wider mb-2 text-center sm:text-left ${isBoy ? 'text-boy-500' : 'text-girl-500'}`}>{t.orBankTransfer}</p>
                       )}
-                      <pre className="text-xs text-gray-600 whitespace-pre-wrap bg-white p-3 rounded-lg mb-3 font-mono flex-1">
+                      <pre className="text-[11px] sm:text-xs text-gray-600 whitespace-pre-wrap break-all bg-white p-3 rounded-lg mb-3 font-mono flex-1 overflow-x-auto">
                         {bankAccounts[selectedBank].details.replace(/\\n/g, '\n')}
                       </pre>
                       <button
