@@ -27,6 +27,10 @@
   box-sizing: border-box;
 }
 
+select {
+  padding-right: calc(1em + 4px) !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
