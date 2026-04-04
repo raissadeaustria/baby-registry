@@ -787,7 +787,7 @@ function ItemForm({ item, onSave, onCancel }: {
           <input required type="number" step="0.01" min="0" value={price} onChange={e => setPrice(e.target.value)} className={inputClass} placeholder="0" />
         </div>
         <div>
-          <label className="text-[10px] text-[#B8977A] font-medium uppercase tracking-wider mb-1 block">Delivery</label>
+          <label className="text-[10px] text-[#B8977A] font-medium uppercase tracking-wider mb-1 block">Delivery ({priceCurrency})</label>
           <input type="number" step="0.01" min="0" value={deliveryPrice} onChange={e => setDeliveryPrice(e.target.value)} className={inputClass} placeholder="0" />
         </div>
         <div>
