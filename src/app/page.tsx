@@ -183,8 +183,8 @@ export default function AdminDashboard() {
       <header className="bg-gradient-to-br from-[#F5E6D3] via-[#F8EDE3] to-[#FDF5ED] border-b border-[#E8D5C0]/50">
         <div className="max-w-2xl mx-auto px-5 pt-6 pb-4">
           {/* Top bar */}
-          <div className="flex items-center justify-between mb-5">
-            <div>
+          <div className="mb-5">
+            <div className="mb-3">
               <p className="text-[10px] uppercase tracking-[0.2em] text-[#B8977A] font-medium mb-0.5">Baby Registry</p>
               <h1 className="text-xl font-bold text-[#5C4033]">Hello, Mama</h1>
             </div>
