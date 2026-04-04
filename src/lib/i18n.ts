@@ -34,6 +34,8 @@ export interface Translations {
   continue_: string;
   amount: string;
   bankTransfer: string;
+  payWithQr: string;
+  orBankTransfer: string;
   copyAccountDetails: string;
   copied: string;
   choosePaymentMethod: string;
@@ -100,6 +102,8 @@ const en: Translations = {
   continue_: 'Continue',
   amount: 'Amount',
   bankTransfer: 'Bank Transfer',
+  payWithQr: 'Pay with QR Code',
+  orBankTransfer: 'Or send via Bank Transfer',
   copyAccountDetails: 'Copy Account Details',
   copied: 'Copied!',
   choosePaymentMethod: 'Choose payment method',
@@ -163,6 +167,8 @@ const es: Translations = {
   continue_: 'Continuar',
   amount: 'Cantidad',
   bankTransfer: 'Transferencia Bancaria',
+  payWithQr: 'Paga con Código QR',
+  orBankTransfer: 'O envía por Transferencia Bancaria',
   copyAccountDetails: 'Copiar Datos Bancarios',
   copied: '¡Copiado!',
   choosePaymentMethod: 'Elige método de pago',
@@ -226,6 +232,8 @@ const cz: Translations = {
   continue_: 'Pokračovat',
   amount: 'Částka',
   bankTransfer: 'Bankovní Převod',
+  payWithQr: 'Zaplatit QR Kódem',
+  orBankTransfer: 'Nebo pošlete Bankovním Převodem',
   copyAccountDetails: 'Kopírovat Údaje Účtu',
   copied: 'Zkopírováno!',
   choosePaymentMethod: 'Vyberte způsob platby',

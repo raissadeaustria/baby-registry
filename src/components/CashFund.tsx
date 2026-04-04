@@ -23,6 +23,7 @@ export default function CashFund({ theme, settings, locale, onComplete }: CashFu
   const [showForm, setShowForm] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedBizum, setCopiedBizum] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [selectedBank, setSelectedBank] = useState<number | null>(null);
 
@@ -225,6 +226,41 @@ export default function CashFund({ theme, settings, locale, onComplete }: CashFu
 
             {/* Payment options grid */}
             <div className="grid grid-cols-2 gap-2">
+              {/* Credit/Debit Card via Revolut - shown first */}
+              {revolutLink && (
+                <a href={revolutLink} target="_blank" rel="noopener noreferrer"
+                  className="p-3 rounded-xl border-2 border-gray-200 hover:border-[#0075EB] text-center transition-all bg-white">
+                  <div className="w-5 h-5 mx-auto mb-1 rounded-full bg-[#0075EB] flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20.39 6.05L13.06 18.3a1.2 1.2 0 01-2.12 0L3.61 6.05A1.2 1.2 0 014.67 4.2h14.66a1.2 1.2 0 011.06 1.85z"/>
+                    </svg>
+                  </div>
+                  <p className="text-xs font-semibold text-gray-600">Credit/Debit Card</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Apple Pay / Revolut</p>
+                </a>
+              )}
+
+              {/* Bizum - EUR only, copies phone number */}
+              {isEur && settings?.bizum_phone && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(settings.bizum_phone!);
+                    setCopiedBizum(true);
+                    setTimeout(() => setCopiedBizum(false), 2000);
+                  }}
+                  className={`p-3 rounded-xl border-2 text-center transition-all ${
+                    copiedBizum ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-[#05C1B2] bg-white'
+                  }`}
+                >
+                  <div className="w-5 h-5 mx-auto mb-1 rounded-full bg-[#05C1B2] flex items-center justify-center">
+                    <span className="text-white font-bold text-[10px]">B</span>
+                  </div>
+                  <p className="text-xs font-semibold text-gray-600">Bizum</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">{copiedBizum ? t.copied : settings.bizum_phone}</p>
+                </button>
+              )}
+
+              {/* Bank accounts */}
               {bankAccounts.map((account, i) => {
                 const bankName = account.details.replace(/\\n/g, '\n').split('\n')[0].trim();
                 const isSelected = selectedBank === i;
@@ -246,50 +282,36 @@ export default function CashFund({ theme, settings, locale, onComplete }: CashFu
                   </button>
                 );
               })}
-
-              {revolutLink && (
-                <a href={revolutLink} target="_blank" rel="noopener noreferrer"
-                  className="p-3 rounded-xl border-2 border-gray-200 hover:border-[#0075EB] text-center transition-all bg-white">
-                  <div className="w-5 h-5 mx-auto mb-1 rounded-full bg-[#0075EB] flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M20.39 6.05L13.06 18.3a1.2 1.2 0 01-2.12 0L3.61 6.05A1.2 1.2 0 014.67 4.2h14.66a1.2 1.2 0 011.06 1.85z"/>
-                    </svg>
-                  </div>
-                  <p className="text-xs font-semibold text-gray-600">Credit/Debit Card</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">Apple Pay / Revolut</p>
-                </a>
-              )}
-
-              {isEur && settings?.bizum_phone && (
-                <a href="https://bizum.es" target="_blank" rel="noopener noreferrer"
-                  className="p-3 rounded-xl border-2 border-gray-200 hover:border-[#05C1B2] text-center transition-all bg-white">
-                  <div className="w-5 h-5 mx-auto mb-1 rounded-full bg-[#05C1B2] flex items-center justify-center">
-                    <span className="text-white font-bold text-[10px]">B</span>
-                  </div>
-                  <p className="text-xs font-semibold text-gray-600">Bizum</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">{settings.bizum_phone}</p>
-                </a>
-              )}
             </div>
 
             {/* Expanded bank details */}
             {selectedBank !== null && bankAccounts[selectedBank] && (
               <div className={`border-2 rounded-xl p-3 transition-all ${isBoy ? 'border-boy-200 bg-boy-50/50' : 'border-girl-200 bg-girl-50/50'}`}>
-                {bankAccounts[selectedBank].qr && (
-                  <div className="flex justify-center mb-2">
-                    <img src={bankAccounts[selectedBank].qr} alt="QR Code" className="w-24 h-24 object-contain rounded-lg bg-white p-1" />
+                <div className={`${bankAccounts[selectedBank].qr ? 'flex flex-col sm:flex-row gap-3' : ''}`}>
+                  {bankAccounts[selectedBank].qr && (
+                    <div className="flex flex-col items-center sm:w-2/5 shrink-0">
+                      <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${isBoy ? 'text-boy-500' : 'text-girl-500'}`}>{t.payWithQr}</p>
+                      <div className="bg-white rounded-xl p-3 shadow-sm">
+                        <img src={bankAccounts[selectedBank].qr} alt="QR Code" className="w-28 h-28 object-contain" />
+                      </div>
+                    </div>
+                  )}
+                  <div className={`flex flex-col ${bankAccounts[selectedBank].qr ? 'sm:w-3/5' : 'w-full'}`}>
+                    {bankAccounts[selectedBank].qr && (
+                      <p className={`text-xs font-semibold uppercase tracking-wider mb-2 text-center sm:text-left ${isBoy ? 'text-boy-500' : 'text-girl-500'}`}>{t.orBankTransfer}</p>
+                    )}
+                    <pre className="text-xs text-gray-600 whitespace-pre-wrap bg-white p-2.5 rounded-lg mb-2 font-mono flex-1">
+                      {bankAccounts[selectedBank].details.replace(/\\n/g, '\n')}
+                    </pre>
+                    <button onClick={() => copyText(bankAccounts[selectedBank!].details)}
+                      className={`w-full py-2 rounded-lg border text-sm font-medium transition-all ${
+                        copied ? 'bg-green-50 border-green-300 text-green-600'
+                          : isBoy ? 'border-boy-200 text-boy-600 hover:bg-white' : 'border-girl-200 text-girl-600 hover:bg-white'
+                      }`}>
+                      {copied ? t.copied : t.copyAccountDetails}
+                    </button>
                   </div>
-                )}
-                <pre className="text-xs text-gray-600 whitespace-pre-wrap bg-white p-2.5 rounded-lg mb-2 font-mono">
-                  {bankAccounts[selectedBank].details.replace(/\\n/g, '\n')}
-                </pre>
-                <button onClick={() => copyText(bankAccounts[selectedBank!].details)}
-                  className={`w-full py-2 rounded-lg border text-sm font-medium transition-all ${
-                    copied ? 'bg-green-50 border-green-300 text-green-600'
-                      : isBoy ? 'border-boy-200 text-boy-600 hover:bg-white' : 'border-girl-200 text-girl-600 hover:bg-white'
-                  }`}>
-                  {copied ? t.copied : t.copyAccountDetails}
-                </button>
+                </div>
               </div>
             )}
 
