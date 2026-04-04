@@ -129,7 +129,7 @@ const en: Translations = {
   message: 'Message',
   thankYou: 'Thank You',
   giftRecorded: 'Your gift has been recorded and items have been marked as fulfilled.',
-  done: 'Done',
+  done: "You're Welcome",
 };
 
 const es: Translations = {
@@ -192,7 +192,7 @@ const es: Translations = {
   message: 'Mensaje',
   thankYou: 'Gracias',
   giftRecorded: 'Tu regalo ha sido registrado y los artículos han sido marcados como cumplidos.',
-  done: 'Listo',
+  done: 'De Nada',
 };
 
 const cz: Translations = {
@@ -255,7 +255,7 @@ const cz: Translations = {
   message: 'Zpráva',
   thankYou: 'Děkujeme',
   giftRecorded: 'Váš dárek byl zaznamenán a položky byly označeny jako splněné.',
-  done: 'Hotovo',
+  done: 'Není Zač',
 };
 
 const TRANSLATIONS: Record<Locale, Translations> = {
